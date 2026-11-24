@@ -1,0 +1,9 @@
+services:
+  durak:
+    image: ghcr.io/floxo05/durak:latest
+    container_name: durak
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
