@@ -10,7 +10,7 @@
   --muted: rgba(246, 241, 228, 0.62);
   --panel: rgba(8, 28, 20, 0.72);
   --panel-border: rgba(244, 201, 93, 0.22);
-  --cw: clamp(52px, 7vmin + 18px, 104px);
+  --cw: clamp(52px, 8vmin + 14px, 128px);
   --ch: calc(var(--cw) * 1.4);
   --font: 'Rubik', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --display: 'Russo One', 'Rubik', system-ui, sans-serif;
@@ -154,6 +154,7 @@ input {
 }
 .field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 6px;
 }
 .field span {
@@ -216,7 +217,7 @@ input:focus {
   font-family: var(--display);
 }
 .logo-text {
-  font-size: clamp(48px, 12vw, 92px);
+  font-size: clamp(40px, 12vw, 92px);
   letter-spacing: 0.08em;
   background: linear-gradient(180deg, #fff5d6, var(--gold) 55%, #b9821b);
   -webkit-background-clip: text;
@@ -287,6 +288,7 @@ input:focus {
 .home-top {
   width: 100%;
   max-width: 900px;
+  gap: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -294,6 +296,7 @@ input:focus {
 .home-hero {
   text-align: center;
   margin-top: 2vh;
+  max-width: 100%;
 }
 .tagline {
   margin: 6px 0 0;
@@ -328,7 +331,15 @@ input:focus {
 .home-form {
   width: min(420px, 100%);
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
+}
+.home-form > *,
+.field > * {
+  min-width: 0;
+}
+.field input {
+  width: 100%;
 }
 .invite-note {
   background: rgba(244, 201, 93, 0.15);
@@ -444,7 +455,7 @@ input:focus {
 .lobby-grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   gap: 16px;
   padding: 10px 16px;
   max-width: 1100px;
@@ -658,6 +669,7 @@ input:focus {
 }
 .lobby-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
@@ -719,6 +731,7 @@ input:focus {
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
 }
 .felt {
@@ -743,7 +756,7 @@ input:focus {
   align-items: center;
   gap: 2px;
   transition: top 0.4s, left 0.4s;
-  width: 110px;
+  width: min(110px, calc(100% / var(--n, 1) - 4px));
 }
 .seat.is-out {
   opacity: 0.55;
@@ -832,7 +845,7 @@ input:focus {
 .seat-name {
   font-weight: 700;
   font-size: 13px;
-  max-width: 110px;
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1120,12 +1133,12 @@ input:focus {
   justify-content: center;
   align-items: flex-end;
   min-height: calc(var(--ch) + 18px);
-  padding: 14px 8px 0;
+  padding: 14px 8px 16px;
   --overlap: clamp(calc(var(--cw) * -0.62), calc((100vw - 40px - var(--n) * var(--cw)) / max(var(--n) - 1, 1)), 6px);
 }
 .hand .in-hand {
   margin-left: var(--overlap);
-  transform: translateY(calc(var(--i) * var(--i) * 1.2px)) rotate(calc(var(--i) * 2.2deg));
+  transform: translateY(calc(min(var(--i) * var(--i), 16) * 0.9px)) rotate(calc(var(--i) * 2deg));
   transform-origin: 50% 120%;
   transition: transform 0.18s, filter 0.2s, box-shadow 0.2s, margin 0.3s;
   cursor: pointer;
@@ -1352,11 +1365,10 @@ input:focus {
     grid-template-rows: minmax(110px, 30%) 1fr;
   }
   .seat {
-    width: 78px;
+    width: min(78px, calc(100% / var(--n, 1) - 4px));
   }
   .seat-name {
     font-size: 11px;
-    max-width: 78px;
   }
   .seat-avatar {
     width: 50px;
@@ -1396,11 +1408,144 @@ input:focus {
     height: 56px;
   }
 }
+
+
+/* long button labels may wrap instead of overflowing */
+.lobby-actions .btn,
+.end-actions .btn {
+  white-space: normal;
+  max-width: 100%;
+}
+.panel {
+  min-width: 0;
+  max-width: 100%;
+}
+.player-list li,
+.pname {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* very narrow phones: compact top bar */
+@media (max-width: 400px) {
+  .topbar {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  .topbar-right {
+    gap: 3px;
+  }
+  .icon-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 15px;
+  }
+  .flag {
+    font-size: 15px;
+    padding: 2px 3px;
+  }
+  .trump-pill {
+    padding: 3px 9px;
+    font-size: 12px;
+  }
+  .game .topbar-right .rules-btn {
+    display: none;
+  }
+}
+
+/* phones in landscape / short windows: flatter seats, smaller cards */
 @media (max-height: 560px) {
   :root {
-    --cw: clamp(40px, 9vh, 70px);
+    --cw: clamp(40px, 11vh, 72px);
+  }
+  .topbar {
+    padding-top: 4px;
+    padding-bottom: 4px;
   }
   .felt {
-    grid-template-rows: minmax(96px, 34%) 1fr;
+    grid-template-rows: auto 1fr;
+    border-radius: 40px;
+  }
+  .opponents {
+    height: 64px;
+  }
+  .seat {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: auto;
+    max-width: 180px;
+    gap: 0 6px;
+    top: 6px !important;
+  }
+  .seat-fan {
+    order: 2;
+    width: 34px;
+    height: 30px;
+  }
+  .pcard.mini {
+    --cw: 18px;
+  }
+  .seat-avatar {
+    width: 44px;
+    height: 44px;
+  }
+  .seat-avatar .avatar {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 13px !important;
+  }
+  .seat-avatar .timer-ring {
+    width: 44px;
+    height: 44px;
+  }
+  .seat-name {
+    order: 3;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+  }
+  .seat-status {
+    display: none;
+  }
+  .role-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+  .center {
+    padding: 2px 16px 8px;
+  }
+  .battlefield {
+    min-height: calc(var(--ch) * 1.1);
+    gap: 6px calc(var(--cw) * 0.3);
+  }
+  .me-area {
+    padding-top: 2px;
+    gap: 2px;
+  }
+  .me-bar {
+    min-height: 36px;
+  }
+  .status {
+    padding: 5px 12px;
+    font-size: 13px;
+  }
+  .hand {
+    padding-top: 8px;
+    min-height: calc(var(--ch) + 8px);
+  }
+  .reaction-bar {
+    bottom: 8px;
+  }
+  .end-card {
+    padding-top: 14px;
+  }
+  .jester {
+    font-size: 44px;
+    margin-top: -40px;
+  }
+  .stamp {
+    font-size: 36px;
   }
 }

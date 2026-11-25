@@ -290,7 +290,7 @@ export function Table({ view, offset, reactions, onError, onToast, onLeave, onSh
           {t('game.trump')} <b className={g.trump === 'H' || g.trump === 'D' ? 'red' : ''}>{SUIT_SYMBOL[g.trump]}</b>
         </div>
         <div className="topbar-right">
-          <button className="icon-btn" onClick={() => setRules(true)} title={t('home.rules')}>
+          <button className="icon-btn rules-btn" onClick={() => setRules(true)} title={t('home.rules')}>
             📜
           </button>
           <MuteButton />
@@ -308,7 +308,7 @@ export function Table({ view, offset, reactions, onError, onToast, onLeave, onSh
       </header>
 
       <div className="felt">
-        <div className="opponents">
+        <div className="opponents" style={{ ['--n' as string]: Math.max(1, n) }}>
           {others.map((p, i) => {
             const x = (i + 1) / (n + 1);
             const lift = Math.sin(Math.PI * x);
