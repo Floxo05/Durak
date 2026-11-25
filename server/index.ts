@@ -7,18 +7,34 @@ import { Server, type Socket } from 'socket.io';
 import { Room, cleanName, newCode, type RPlayer } from './rooms';
 import { REACTIONS, type GameAction, type Settings } from '../shared/protocol';
 
-const PORT = Number(process.env.PORT ?? 3000);
+const envInt = (name: string, fallback: number) => {
+  const v = Number.parseInt(process.env[name] ?? '', 10);
+  return Number.isFinite(v) && v > 0 ? v : fallback;
+};
+
+const PORT = envInt('PORT', 3000);
+/** max. tables at the same time */
+const MAX_ROOMS = envInt('MAX_ROOMS', 5);
+/** max. simultaneous socket connections (all tables together) */
+const MAX_CONNECTIONS = envInt('MAX_CONNECTIONS', 60);
+/** a table nobody is connected to for this long is freed */
+const ABANDONED_MS = envInt('ABANDONED_MINUTES', 5) * 60_000;
 const ROOM_IDLE_MS = 1000 * 60 * 60 * 3;
 
 const app = express();
 const http = createServer(app);
-const io = new Server(http, { cors: { origin: process.env.CORS_ORIGIN ?? false } });
+const io = new Server(http, {
+  cors: { origin: process.env.CORS_ORIGIN ?? false },
+  // game messages are tiny; refuse anything big
+  maxHttpBufferSize: 16 * 1024,
+  allowRequest: (_req, cb) => cb(null, io.engine.clientsCount < MAX_CONNECTIONS),
+});
 
 const here = dirname(fileURLToPath(import.meta.url));
 const publicDir = [join(here, 'public'), join(here, '../dist/public')].find((d) => existsSync(d));
 
 app.get('/healthz', (_req, res) => {
-  res.json({ ok: true, rooms: rooms.size });
+  res.json({ ok: true, rooms: rooms.size, maxRooms: MAX_ROOMS });
 });
 if (publicDir) {
   app.use(express.static(publicDir, { maxAge: '1h', index: false }));
@@ -26,6 +42,29 @@ if (publicDir) {
 }
 
 const rooms = new Map<string, Room>();
+
+/** since when nobody is connected to the table (null = someone is there) */
+function abandonedSince(room: Room): number | null {
+  if (room.players.length === 0) return 0;
+  let since = 0;
+  for (const p of room.players) {
+    if (p.sockets.size > 0) return null;
+    since = Math.max(since, p.disconnectedAt ?? room.lastActivity);
+  }
+  return since;
+}
+
+function deleteRoom(code: string) {
+  rooms.get(code)?.dispose();
+  rooms.delete(code);
+}
+
+function pruneRooms(now = Date.now()) {
+  for (const [code, room] of rooms) {
+    const since = abandonedSince(room);
+    if ((since !== null && now - since > ABANDONED_MS) || now - room.lastActivity > ROOM_IDLE_MS) deleteRoom(code);
+  }
+}
 
 function broadcast(room: Room) {
   for (const p of room.players) {
@@ -64,6 +103,8 @@ io.on('connection', (socket: Socket) => {
     let room: Room | undefined;
     if (msg?.create) {
       if (!name) return ack({ ok: false, error: 'err.nameRequired' });
+      if (rooms.size >= MAX_ROOMS) pruneRooms();
+      if (rooms.size >= MAX_ROOMS) return ack({ ok: false, error: 'err.tooManyRooms' });
       room = new Room(newCode(rooms), broadcast);
       rooms.set(room.code, room);
     } else {
@@ -119,10 +160,7 @@ io.on('connection', (socket: Socket) => {
       ctx.room = undefined;
       ctx.player = undefined;
       broadcast(room);
-      if (room.players.length === 0) {
-        room.dispose();
-        rooms.delete(room.code);
-      }
+      if (room.players.length === 0) deleteRoom(room.code);
     }),
   );
 
@@ -138,18 +176,11 @@ io.on('connection', (socket: Socket) => {
   socket.on('disconnect', leaveCurrent);
 });
 
-// housekeeping: forget idle / empty rooms
-setInterval(() => {
-  const now = Date.now();
-  for (const [code, room] of rooms) {
-    const anyone = room.players.some((p) => p.sockets.size > 0);
-    if (room.players.length === 0 || (!anyone && now - room.lastActivity > 1000 * 60 * 30) || now - room.lastActivity > ROOM_IDLE_MS) {
-      room.dispose();
-      rooms.delete(code);
-    }
-  }
-}, 60_000).unref();
+// housekeeping: free abandoned / idle tables
+setInterval(() => pruneRooms(), 30_000).unref();
 
 http.listen(PORT, () => {
-  console.log(`Durak server listening on :${PORT}${publicDir ? '' : ' (no client build found)'}`);
+  console.log(
+    `Durak server listening on :${PORT} (max ${MAX_ROOMS} tables, ${MAX_CONNECTIONS} connections)${publicDir ? '' : ' – no client build found'}`,
+  );
 });

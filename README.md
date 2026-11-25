@@ -28,16 +28,29 @@ GitHub Container Registry: `ghcr.io/floxo05/durak`.
 | `sha-xxxxxxx` | jeder Commit |
 | `1.2.3` | Git-Tag `v1.2.3` |
 
-In Dockge einen neuen Stack anlegen und die `compose.yaml` aus dem Repo einfügen:
+In Dockge einen neuen Stack anlegen und die [`compose.yaml`](compose.yaml) aus dem Repo einfügen.
 
-```yaml
-services:
-  durak:
-    image: ghcr.io/floxo05/durak:latest
-    restart: unless-stopped
-    ports:
-      - "3000:3000"
-```
+### Einstellungen (Umgebungsvariablen)
+
+| Variable | Standard | Bedeutung |
+| --- | --- | --- |
+| `MAX_ROOMS` | `5` | Tische gleichzeitig. Weitere werden mit Hinweis abgelehnt. |
+| `MAX_CONNECTIONS` | `60` | Browser-Verbindungen insgesamt |
+| `ABANDONED_MINUTES` | `5` | Ist niemand mehr an einem Tisch verbunden, wird er nach dieser Zeit freigegeben. |
+| `PORT` | `3000` | Port im Container |
+
+### Absicherung
+
+Die `compose.yaml` ist so gehärtet, dass der Container höchstens sich selbst lahmlegen kann:
+
+- läuft als UID/GID `1000`, nie als root; die App-Dateien gehören root und sind für die App nur lesbar
+- `read_only` Dateisystem (die App schreibt nichts auf die Platte), nur `/tmp` als kleines tmpfs
+- `cap_drop: ALL` und `no-new-privileges`
+- Limits: 256 MB RAM ohne Swap, 0,5 CPU, 64 Prozesse, 1024 Dateien, Log-Rotation
+- eigener Stack = eigenes Docker-Netz, kein Zugriff auf andere Stacks
+- Server-seitig: max. Tische und Verbindungen (s. o.), Nachrichten über 16 KB werden abgewiesen
+
+Mit einem Reverse Proxy auf demselben Host den Port nur lokal freigeben: `"127.0.0.1:3000:3000"`.
 
 **Privates Repo?** Dann ist auch das Paket auf GHCR privat. Entweder unter
 GitHub → Packages → durak → *Package settings* die Sichtbarkeit auf *Public* stellen, oder auf dem Server

@@ -4,6 +4,28 @@ services:
     container_name: durak
     restart: unless-stopped
     ports:
+      # behind a reverse proxy on the same host use "127.0.0.1:3000:3000"
       - "3000:3000"
     environment:
-      - PORT=3000
+      - MAX_ROOMS=5 # tables at the same time
+      - MAX_CONNECTIONS=60 # browser connections in total
+      - ABANDONED_MINUTES=5 # free a table after everyone left for this long
+      - NODE_OPTIONS=--max-old-space-size=160
+
+    # --- hardening: the container can only hurt itself ---
+    user: "1000:1000"
+    read_only: true # app writes nothing to disk
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    ulimits:
+      nofile: { soft: 1024, hard: 1024 }
+    logging:
+      driver: json-file
+      options: { max-size: "5m", max-file: "2" }
