@@ -50,7 +50,7 @@ Die `compose.yaml` ist so gehärtet, dass der Container höchstens sich selbst l
 - eigener Stack = eigenes Docker-Netz, kein Zugriff auf andere Stacks
 - Server-seitig: max. Tische und Verbindungen (s. o.), Nachrichten über 16 KB werden abgewiesen
 
-Mit einem Reverse Proxy auf demselben Host den Port nur lokal freigeben: `"127.0.0.1:3000:3000"`.
+Die `compose.yaml` veröffentlicht keinen Port, sondern hängt den Container an das externe Netz von Nginx Proxy Manager (`npm`). In NPM einen Proxy Host auf `http://durak:3000` anlegen und *Websockets Support* aktivieren. Heißt das NPM-Netz anders, `name:` unter `networks` anpassen (`docker network ls`).
 
 **Privates Repo?** Dann ist auch das Paket auf GHCR privat. Entweder unter
 GitHub → Packages → durak → *Package settings* die Sichtbarkeit auf *Public* stellen, oder auf dem Server

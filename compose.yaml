@@ -3,9 +3,12 @@ services:
     image: ghcr.io/floxo05/durak:latest
     container_name: durak
     restart: unless-stopped
-    ports:
-      # behind a reverse proxy on the same host use "127.0.0.1:3000:3000"
-      - "3000:3000"
+    # no published ports: Nginx Proxy Manager reaches the app via the shared
+    # network at http://durak:3000 (enable "Websockets Support" in NPM)
+    expose:
+      - "3000"
+    networks:
+      - npm
     environment:
       - MAX_ROOMS=5 # tables at the same time
       - MAX_CONNECTIONS=60 # browser connections in total
@@ -29,3 +32,9 @@ services:
     logging:
       driver: json-file
       options: { max-size: "5m", max-file: "2" }
+
+networks:
+  npm:
+    external: true
+    # name of the network Nginx Proxy Manager is attached to (docker network ls)
+    name: npm
