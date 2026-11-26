@@ -252,27 +252,42 @@ input:focus {
 
 /* ---------- language ---------- */
 .lang-switch {
-  display: flex;
-  gap: 4px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 10px;
   background: rgba(0, 0, 0, 0.25);
-  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
 }
-.flag {
-  border: 0;
-  background: transparent;
-  font-size: 18px;
-  padding: 3px 6px;
-  border-radius: 7px;
-  opacity: 0.5;
-  filter: grayscale(0.5);
-  transition: 0.2s;
+.lang-switch:hover,
+.lang-switch:focus-within {
+  background: rgba(0, 0, 0, 0.4);
+  border-color: var(--gold);
 }
-.flag.active,
-.flag:hover {
-  opacity: 1;
-  filter: none;
-  background: rgba(255, 255, 255, 0.14);
+.lang-current {
+  pointer-events: none;
+}
+.lang-current .lang-code {
+  letter-spacing: 0.04em;
+}
+/* the native select sits invisibly on top: works with touch, keyboard and screen readers */
+.lang-switch select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
+}
+.lang-switch option {
+  color: #111;
+  background: #fff;
 }
 
 /* ---------- home ---------- */
@@ -426,6 +441,7 @@ input:focus {
   display: flex;
   gap: 6px;
   align-items: center;
+  margin-left: auto;
 }
 .trump-pill {
   background: rgba(255, 255, 255, 0.92);
@@ -1440,9 +1456,12 @@ input:focus {
     height: 30px;
     font-size: 15px;
   }
-  .flag {
-    font-size: 15px;
-    padding: 2px 3px;
+  .lang-switch {
+    height: 30px;
+    padding: 0 7px;
+  }
+  .lang-current .lang-code {
+    display: none;
   }
   .trump-pill {
     padding: 3px 9px;

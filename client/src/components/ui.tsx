@@ -54,20 +54,20 @@ export function useCountdown(deadline: number | null, totalMs: number, offset: n
 
 export function LangSwitch() {
   const { lang, setLang } = useI18n();
+  const cur = LANGS.find((l) => l.id === lang) ?? LANGS[0];
   return (
-    <div className="lang-switch">
-      {LANGS.map((l) => (
-        <button
-          key={l.id}
-          className={`flag ${l.id === lang ? 'active' : ''}`}
-          onClick={() => setLang(l.id)}
-          title={l.label}
-          aria-label={l.label}
-        >
-          {l.flag}
-        </button>
-      ))}
-    </div>
+    <label className="lang-switch" title={cur.label}>
+      <span className="lang-current" aria-hidden>
+        {cur.flag} <span className="lang-code">{cur.id.toUpperCase()}</span> ▾
+      </span>
+      <select value={lang} onChange={(e) => setLang(e.target.value as typeof lang)} aria-label="Language">
+        {LANGS.map((l) => (
+          <option key={l.id} value={l.id}>
+            {l.flag} {l.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 

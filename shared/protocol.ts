@@ -1,6 +1,6 @@
 import type { Card, Suit } from './cards';
 
-export type Lang = 'de' | 'fr' | 'en';
+export type Lang = 'de' | 'fr' | 'en' | 'it' | 'no' | 'tr';
 
 export interface Settings {
   /** lowest rank in the deck: 6 → 36 cards, 2 → 52 cards ... */

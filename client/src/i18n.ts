@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { Lang } from '../../shared/protocol';
+import { it, no, tr } from './i18n-extra';
 
 type Dict = Record<string, string>;
 
@@ -306,11 +307,14 @@ const en: Dict = {
   'common.close': 'Close',
 };
 
-export const DICTS: Record<Lang, Dict> = { de, fr, en };
+export const DICTS: Record<Lang, Dict> = { de, fr, en, it, no, tr };
 export const LANGS: { id: Lang; flag: string; label: string }[] = [
   { id: 'de', flag: '🇩🇪', label: 'Deutsch' },
   { id: 'fr', flag: '🇫🇷', label: 'Français' },
   { id: 'en', flag: '🇬🇧', label: 'English' },
+  { id: 'it', flag: '🇮🇹', label: 'Italiano' },
+  { id: 'no', flag: '🇳🇴', label: 'Norsk' },
+  { id: 'tr', flag: '🇹🇷', label: 'Türkçe' },
 ];
 
 export function detectLang(): Lang {
@@ -320,8 +324,12 @@ export function detectLang(): Lang {
   } catch {
     /* ignore */
   }
-  const nav = (navigator.language || 'de').slice(0, 2);
-  return nav === 'fr' ? 'fr' : nav === 'en' ? 'en' : 'de';
+  for (const l of navigator.languages ?? [navigator.language]) {
+    const code = (l || '').slice(0, 2).toLowerCase();
+    if (code === 'nb' || code === 'nn' || code === 'no') return 'no';
+    if (code in DICTS) return code as Lang;
+  }
+  return 'de';
 }
 
 export type TFn = (key: string, vars?: Record<string, string | number>) => string;

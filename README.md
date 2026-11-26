@@ -12,7 +12,7 @@ Namen eingeben, Tisch eröffnen, Link an die Freunde schicken, losspielen.
   - Beim Nachlegen läuft die halbe Zeit, danach gilt „Bito“
 - 2–6 Spieler (bei 52 Karten bis 8), Zuschauer steigen in der nächsten Runde ein
 - Sofortige Updates über WebSockets, Reload bringt dich an deinen Platz zurück
-- 🇩🇪 Deutsch, 🇫🇷 Französisch, 🇬🇧 Englisch, pro Spieler umschaltbar
+- 🇩🇪 Deutsch, 🇫🇷 Französisch, 🇬🇧 Englisch, 🇮🇹 Italienisch, 🇳🇴 Norwegisch, 🇹🇷 Türkisch: pro Spieler umschaltbar, Standard nach Browsersprache
 - Emoji-Reaktionen, Soundeffekte, Revanche-Knopf, Durak-Zähler pro Tisch
 - Kartengrafiken: [@letele/playing-cards](https://github.com/letele/playing-cards) nach Adrian Kennards SVG-Karten (CC0)
 
